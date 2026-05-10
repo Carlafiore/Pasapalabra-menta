@@ -170,6 +170,51 @@ input[type="text"]:disabled {
   box-shadow: 0 0 14px rgba(245, 158, 11, 0.5);
 }
 
+/* ── PANTALLA TRASPASO ────────────────────────────────────────────────────── */
+#screen-handoff {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.handoff-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 56px 40px;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(124, 58, 237, 0.08);
+}
+
+.handoff-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.handoff-name {
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--current);
+  text-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+  word-break: break-word;
+}
+
+.handoff-hint {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 280px;
+}
+
 /* ── PANTALLA DE JUEGO ────────────────────────────────────────────────────── */
 #screen-game {
   display: flex;
@@ -194,39 +239,27 @@ input[type="text"]:disabled {
 
 .game-layout {
   display: grid;
-  grid-template-columns: 1fr 300px 1fr;
+  grid-template-columns: 1fr 320px;
   gap: 16px;
   align-items: start;
   flex: 1;
 }
 
-/* ── PANELES DE JUGADOR ───────────────────────────────────────────────────── */
+/* ── PANEL DEL ROSCO ──────────────────────────────────────────────────────── */
 .player-panel {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
   padding: 16px;
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid var(--current);
   border-radius: 16px;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.player-panel.active {
-  border-color: var(--current);
-  box-shadow: 0 0 24px rgba(0, 229, 255, 0.12);
-}
-
-.player-panel.done {
-  border-color: var(--correct);
-  box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
-  opacity: 0.85;
+  box-shadow: 0 0 24px rgba(0, 229, 255, 0.1);
 }
 
 .player-panel svg {
   width: 100%;
-  max-width: 360px;
+  max-width: 440px;
   height: auto;
   overflow: visible;
 }
@@ -535,19 +568,15 @@ input[type="text"]:disabled {
 }
 
 /* ── RESPONSIVE ───────────────────────────────────────────────────────────── */
-@media (max-width: 900px) {
+@media (max-width: 800px) {
   .game-layout {
     grid-template-columns: 1fr;
-    grid-template-rows: auto;
   }
 
   .center-panel {
-    order: -1;
+    order: 1;
     position: static;
   }
-
-  .game-layout .player-panel:nth-child(1) { order: 0; }
-  .game-layout .player-panel:nth-child(3) { order: 1; }
 
   .answer-summaries {
     grid-template-columns: 1fr;
@@ -555,9 +584,11 @@ input[type="text"]:disabled {
 }
 
 @media (max-width: 500px) {
-  .setup-card, .gameover-card {
+  .setup-card, .gameover-card, .handoff-card {
     padding: 32px 20px;
   }
+
+  .handoff-name { font-size: 2rem; }
 
   .timer { font-size: 2.4rem; }
 

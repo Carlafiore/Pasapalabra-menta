@@ -39,7 +39,19 @@
   </div>
 
   <!-- ═══════════════════════════════════════════════
-       PANTALLA 2: JUEGO
+       PANTALLA 2: TRASPASO DE TURNO
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-handoff" class="screen hidden">
+    <div class="handoff-card">
+      <p class="handoff-label">Le toca a</p>
+      <h2 id="handoff-player-name" class="handoff-name">Jugador 1</h2>
+      <p class="handoff-hint">Pasá el dispositivo sin que el otro jugador vea la pantalla</p>
+      <button id="btn-handoff-start" class="btn btn-primary">Empezar mi turno</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       PANTALLA 3: JUEGO
   ═══════════════════════════════════════════════ -->
   <div id="screen-game" class="screen hidden">
 
@@ -49,17 +61,17 @@
 
     <div class="game-layout">
 
-      <!-- Rosco jugador 1 -->
-      <div id="player-panel-0" class="player-panel">
-        <svg id="rosco-0"
+      <!-- Rosco del jugador activo -->
+      <div id="player-panel" class="player-panel">
+        <svg id="rosco-active"
              viewBox="0 0 400 400"
              xmlns="http://www.w3.org/2000/svg"
              role="img"
-             aria-label="Rosco del Jugador 1">
+             aria-label="Rosco del jugador activo">
         </svg>
       </div>
 
-      <!-- Panel central -->
+      <!-- Panel de juego -->
       <div class="center-panel">
 
         <div id="timer" class="timer">1:00</div>
@@ -97,21 +109,11 @@
 
       </div><!-- /center-panel -->
 
-      <!-- Rosco jugador 2 -->
-      <div id="player-panel-1" class="player-panel">
-        <svg id="rosco-1"
-             viewBox="0 0 400 400"
-             xmlns="http://www.w3.org/2000/svg"
-             role="img"
-             aria-label="Rosco del Jugador 2">
-        </svg>
-      </div>
-
     </div><!-- /game-layout -->
   </div><!-- /screen-game -->
 
   <!-- ═══════════════════════════════════════════════
-       PANTALLA 3: FIN DE JUEGO
+       PANTALLA 4: FIN DE JUEGO
   ═══════════════════════════════════════════════ -->
   <div id="screen-gameover" class="screen hidden">
     <div class="gameover-card">
@@ -139,7 +141,6 @@
     </div>
   </div><!-- /screen-gameover -->
 
-  <!-- Scripts (sin módulos para máxima compatibilidad) -->
   <script src="questions.js"></script>
   <script src="game.js"></script>
 </body>

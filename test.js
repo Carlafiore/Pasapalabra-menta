@@ -51,14 +51,15 @@ loadGlobal('/home/user/Pasapalabra-menta/questions.js');
 loadGlobal('/home/user/Pasapalabra-menta/game.js');
 
 // Stubear todas las funciones de render — solo probamos lógica pura
-render          = () => {};
-renderRosco     = () => {};
-renderCenter    = () => {};
-updatePanelClasses = () => {};
+render             = () => {};
+renderRosco        = () => {};
+renderCenter       = () => {};
 flashWrongAnswer   = () => {};
 updateTimerDisplay = () => {};
-startTimer      = () => {};  // evitar setInterval real en tests
-playSound       = () => {};  // evitar AudioContext en tests
+startTimer         = () => {};  // evitar setInterval real en tests
+playSound          = () => {};  // evitar AudioContext en tests
+// showHandoff actualiza state.activePlayer pero no cambia pantallas en tests
+showHandoff        = (idx) => { state.activePlayer = idx; };
 
 // ── 3. HELPERS DE TEST ────────────────────────────────────────────────────
 let passed = 0, failed = 0;
@@ -132,10 +133,18 @@ assert(state.players[0].rosco[0].status === 'current', 'J1: letra A en estado cu
 assert(state.players[1].rosco[0].status === 'current', 'J2: letra A en estado current');
 assert(state.activePlayer === 0,            'Turno inicial: Jugador 1');
 
-// Verificar que ambos jugadores recibieron las mismas preguntas
+// Cada jugador recibe selección independiente del banco
 const q0 = state.players[0].rosco.map(r => r.question.resp);
 const q1 = state.players[1].rosco.map(r => r.question.resp);
-assert(JSON.stringify(q0) === JSON.stringify(q1), 'Ambos jugadores tienen las mismas preguntas');
+assert(q0.length === 27 && q1.length === 27, 'Ambos jugadores tienen 27 preguntas (selección independiente)');
+assert(
+  state.players[0].rosco.every(item => QUESTION_BANK[item.letter].includes(item.question)),
+  'J1: preguntas pertenecen al banco correcto por letra'
+);
+assert(
+  state.players[1].rosco.every(item => QUESTION_BANK[item.letter].includes(item.question)),
+  'J2: preguntas pertenecen al banco correcto por letra'
+);
 
 // ── 7. TEST: RESPUESTA CORRECTA ───────────────────────────────────────────
 console.log('\n=== TEST 4: Respuesta correcta ===');
