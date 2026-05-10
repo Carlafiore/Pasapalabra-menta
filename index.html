@@ -9,9 +9,7 @@
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════════════════
-       PANTALLA 1: SETUP
-  ═══════════════════════════════════════════════ -->
+  <!-- PANTALLA 1: SETUP -->
   <div id="screen-setup" class="screen">
     <div class="setup-card">
       <h1><span>El Rosco</span></h1>
@@ -38,108 +36,59 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════
-       PANTALLA 2: JUEGO
-  ═══════════════════════════════════════════════ -->
+  <!-- PANTALLA 2: JUEGO -->
   <div id="screen-game" class="screen hidden">
-
     <div class="game-header">
       <span class="game-title">El Rosco · Pasapalabra</span>
     </div>
-
     <div class="game-layout">
-
-      <!-- Rosco jugador 1 -->
       <div id="player-panel-0" class="player-panel">
-        <svg id="rosco-0"
-             viewBox="0 0 400 400"
-             xmlns="http://www.w3.org/2000/svg"
-             role="img"
-             aria-label="Rosco del Jugador 1">
-        </svg>
+        <svg id="rosco-0" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rosco del Jugador 1"></svg>
       </div>
-
-      <!-- Panel central -->
       <div class="center-panel">
-
         <div id="timer" class="timer">1:00</div>
         <div id="current-player-label" class="current-player-label">Turno de Jugador 1</div>
-
         <div class="question-card">
           <div id="current-letter-display" class="current-letter-display">A</div>
           <p id="definition-text" class="definition-text">Cargando definición…</p>
         </div>
-
         <div class="input-area">
-          <input
-            id="answer-input"
-            type="text"
-            placeholder="Tu respuesta…"
-            autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off"
-            spellcheck="false"
-            aria-label="Campo de respuesta"
-          >
+          <input id="answer-input" type="text" placeholder="Tu respuesta…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Campo de respuesta">
           <div class="btn-row">
             <button id="btn-answer" class="btn btn-answer">Responder ↵</button>
             <button id="btn-pass"   class="btn btn-pass">Pasapalabra →</button>
           </div>
           <div id="wrong-flash" class="wrong-flash" aria-live="polite"></div>
         </div>
-
         <div class="legend">
           <span class="legend-item"><span class="legend-dot current"></span>Turno</span>
           <span class="legend-item"><span class="legend-dot correct"></span>OK</span>
           <span class="legend-item"><span class="legend-dot wrong"></span>Mal</span>
           <span class="legend-item"><span class="legend-dot passed"></span>Pasa</span>
         </div>
-
-      </div><!-- /center-panel -->
-
-      <!-- Rosco jugador 2 -->
-      <div id="player-panel-1" class="player-panel">
-        <svg id="rosco-1"
-             viewBox="0 0 400 400"
-             xmlns="http://www.w3.org/2000/svg"
-             role="img"
-             aria-label="Rosco del Jugador 2">
-        </svg>
       </div>
+      <div id="player-panel-1" class="player-panel">
+        <svg id="rosco-1" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rosco del Jugador 2"></svg>
+      </div>
+    </div>
+  </div>
 
-    </div><!-- /game-layout -->
-  </div><!-- /screen-game -->
-
-  <!-- ═══════════════════════════════════════════════
-       PANTALLA 3: FIN DE JUEGO
-  ═══════════════════════════════════════════════ -->
+  <!-- PANTALLA 3: FIN DE JUEGO -->
   <div id="screen-gameover" class="screen hidden">
     <div class="gameover-card">
-
       <h2 id="winner-text">¡Ganó el Jugador 1!</h2>
-
       <div class="results">
         <p id="result-p0">Jugador 1: <span class="score-num">0</span> / 27</p>
         <p id="result-p1">Jugador 2: <span class="score-num">0</span> / 27</p>
       </div>
-
       <div class="answer-summaries">
-        <div class="answer-summary">
-          <h4>Errores / sin responder — J1</h4>
-          <div id="summary-p0"></div>
-        </div>
-        <div class="answer-summary">
-          <h4>Errores / sin responder — J2</h4>
-          <div id="summary-p1"></div>
-        </div>
+        <div class="answer-summary"><h4>Errores / sin responder — J1</h4><div id="summary-p0"></div></div>
+        <div class="answer-summary"><h4>Errores / sin responder — J2</h4><div id="summary-p1"></div></div>
       </div>
-
       <button id="btn-restart" class="btn btn-primary">Jugar de nuevo</button>
-
     </div>
-  </div><!-- /screen-gameover -->
+  </div>
 
-  <!-- Scripts (sin módulos para máxima compatibilidad) -->
   <script src="questions.js"></script>
   <script src="game.js"></script>
 </body>

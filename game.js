@@ -1,14 +1,12 @@
 'use strict';
 
-// ─── CONSTANTES ──────────────────────────────────────────────────────────────
 const ALPHABET = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','Ñ',
                   'O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-const TURN_DURATION  = 60;   // segundos por turno
-const MAX_GAME_TIME  = 900;  // segundos totales máximos (15 min)
+const TURN_DURATION  = 60;
+const MAX_GAME_TIME  = 900;
 
-// ─── ESTADO ──────────────────────────────────────────────────────────────────
 const state = {
-  phase: 'setup',     // 'setup' | 'playing' | 'gameover'
+  phase: 'setup',
   players: [
     { name: 'Jugador 1', rosco: [], currentIdx: 0, done: false },
     { name: 'Jugador 2', rosco: [], currentIdx: 0, done: false },
@@ -17,16 +15,14 @@ const state = {
   turnTimeLeft: TURN_DURATION,
   totalElapsed:  0,
   timerInterval: null,
-  questions:     [],   // 27 preguntas, una por letra, compartidas por ambos
+  questions:     [],
   audioCtx:      null,
 };
 
-// ─── AUDIO (Web Audio API, sin archivos externos) ─────────────────────────────
 function getAudioCtx() {
   if (!state.audioCtx) {
     state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-  // Reanudar si estaba suspendido (política de autoplay)
   if (state.audioCtx.state === 'suspended') state.audioCtx.resume();
   return state.audioCtx;
 }
@@ -35,52 +31,35 @@ function playSound(type) {
   try {
     const ctx = getAudioCtx();
     const t   = ctx.currentTime;
-
-    const note = (freq, start, dur, type = 'sine', vol = 0.35) => {
+    const note = (freq, start, dur, wtype = 'sine', vol = 0.35) => {
       const osc  = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
       gain.connect(ctx.destination);
-      osc.type = type;
+      osc.type = wtype;
       osc.frequency.setValueAtTime(freq, t + start);
       gain.gain.setValueAtTime(vol, t + start);
       gain.gain.exponentialRampToValueAtTime(0.001, t + start + dur);
       osc.start(t + start);
       osc.stop(t  + start + dur + 0.05);
     };
-
     switch (type) {
-      case 'correct':
-        note(660, 0,    0.12);
-        note(880, 0.12, 0.3);
-        break;
-      case 'wrong':
-        note(220, 0,   0.15, 'sawtooth', 0.3);
-        note(110, 0.15, 0.35, 'sawtooth', 0.25);
-        break;
-      case 'tick':
-        note(900, 0, 0.06, 'square', 0.12);
-        break;
-      case 'switch':
-        note(440, 0,    0.1);
-        note(554, 0.12, 0.2);
-        break;
-      case 'win':
-        [523, 659, 784, 1047].forEach((f, i) => note(f, i * 0.14, 0.35, 'sine', 0.3));
-        break;
+      case 'correct': note(660,0,0.12); note(880,0.12,0.3); break;
+      case 'wrong':   note(220,0,0.15,'sawtooth',0.3); note(110,0.15,0.35,'sawtooth',0.25); break;
+      case 'tick':    note(900,0,0.06,'square',0.12); break;
+      case 'switch':  note(440,0,0.1); note(554,0.12,0.2); break;
+      case 'win':     [523,659,784,1047].forEach((f,i)=>note(f,i*0.14,0.35,'sine',0.3)); break;
     }
-  } catch (_) { /* silenciar si el contexto no está disponible */ }
+  } catch (_) {}
 }
 
-// ─── UTILIDADES ──────────────────────────────────────────────────────────────
 function normalize(s) {
   return String(s).toUpperCase()
-    .replace(/[ÁÀÂÄ]/g, 'A').replace(/[ÉÈÊË]/g, 'E')
-    .replace(/[ÍÌÎÏ]/g, 'I').replace(/[ÓÒÔÖ]/g, 'O')
-    .replace(/[ÚÙÛÜ]/g, 'U')
-    // Aceptar Ñ/N indistintamente (teclados sin español)
-    .replace(/Ñ/g, 'N').replace(/ñ/g, 'N')
-    .replace(/[^A-Z0-9]/g, '')
+    .replace(/[ÁÀÂÄ]/g,'A').replace(/[ÉÈÊË]/g,'E')
+    .replace(/[ÍÌÎÏ]/g,'I').replace(/[ÓÒÔÖ]/g,'O')
+    .replace(/[ÚÙÛÜ]/g,'U')
+    .replace(/Ñ/g,'N').replace(/ñ/g,'N')
+    .replace(/[^A-Z0-9]/g,'')
     .trim();
 }
 
@@ -89,7 +68,6 @@ function formatTime(s) {
   return `${m}:${String(s % 60).padStart(2, '0')}`;
 }
 
-// ─── SELECCIÓN DE PREGUNTAS ──────────────────────────────────────────────────
 function selectQuestions() {
   return ALPHABET.map(letter => {
     const pool = QUESTION_BANK[letter];
@@ -101,15 +79,13 @@ function buildRosco(questions) {
   return ALPHABET.map((letter, i) => ({
     letter,
     question:     questions[i],
-    status:       'pending',   // pending | current | correct | wrong | passed
+    status:       'pending',
     passedBefore: false,
   }));
 }
 
-// ─── INICIALIZACIÓN ──────────────────────────────────────────────────────────
 function initGame(p1name, p2name) {
   state.questions = selectQuestions();
-
   [0, 1].forEach(i => {
     const p = state.players[i];
     p.name       = [p1name, p2name][i] || `Jugador ${i + 1}`;
@@ -118,18 +94,15 @@ function initGame(p1name, p2name) {
     p.currentIdx = 0;
     p.done       = false;
   });
-
   state.activePlayer  = 0;
   state.turnTimeLeft  = TURN_DURATION;
   state.totalElapsed  = 0;
   state.phase         = 'playing';
-
   showScreen('game');
   render();
   startTimer();
 }
 
-// ─── RENDERIZADO DEL ROSCO (SVG dinámico) ────────────────────────────────────
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const CX = 200, CY = 200, RING_R = 158, NODE_R = 17;
 
@@ -138,8 +111,6 @@ function renderRosco(pidx) {
   const rosco = state.players[pidx].rosco;
   const n     = rosco.length;
   svg.innerHTML = '';
-
-  // Anillo decorativo
   const ring = document.createElementNS(SVG_NS, 'circle');
   ring.setAttribute('cx', CX); ring.setAttribute('cy', CY);
   ring.setAttribute('r',  RING_R);
@@ -147,38 +118,28 @@ function renderRosco(pidx) {
   ring.setAttribute('stroke', '#1e2a40');
   ring.setAttribute('stroke-width', '2');
   svg.appendChild(ring);
-
-  // Nodos de letras
   rosco.forEach((item, i) => {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
     const x = CX + RING_R * Math.cos(angle);
     const y = CY + RING_R * Math.sin(angle);
-
     const g = document.createElementNS(SVG_NS, 'g');
     g.setAttribute('class', `rosco-node status-${item.status}`);
-    if (item.status === 'current') g.setAttribute('data-current', '1');
-
     const circle = document.createElementNS(SVG_NS, 'circle');
     circle.setAttribute('cx', x); circle.setAttribute('cy', y);
     circle.setAttribute('r',  NODE_R);
-
     const text = document.createElementNS(SVG_NS, 'text');
     text.setAttribute('x', x); text.setAttribute('y', y);
     text.setAttribute('text-anchor', 'middle');
     text.setAttribute('dominant-baseline', 'central');
     text.setAttribute('class', 'node-letter');
     text.textContent = item.letter;
-
     g.appendChild(circle);
     g.appendChild(text);
     svg.appendChild(g);
   });
-
-  // Centro: nombre y marcador
   const player  = state.players[pidx];
   const correct = rosco.filter(r => r.status === 'correct').length;
   const wrong   = rosco.filter(r => r.status === 'wrong').length;
-
   const cName = document.createElementNS(SVG_NS, 'text');
   cName.setAttribute('x', CX); cName.setAttribute('y', CY - 14);
   cName.setAttribute('text-anchor', 'middle');
@@ -186,7 +147,6 @@ function renderRosco(pidx) {
   cName.setAttribute('class', 'center-name');
   cName.textContent = player.name;
   svg.appendChild(cName);
-
   const cScore = document.createElementNS(SVG_NS, 'text');
   cScore.setAttribute('x', CX); cScore.setAttribute('y', CY + 12);
   cScore.setAttribute('text-anchor', 'middle');
@@ -194,8 +154,6 @@ function renderRosco(pidx) {
   cScore.setAttribute('class', 'center-score');
   cScore.textContent = `${correct} ✓  ${wrong} ✗`;
   svg.appendChild(cScore);
-
-  // Aro de jugador activo
   if (state.activePlayer === pidx && !player.done && state.phase === 'playing') {
     const arc = document.createElementNS(SVG_NS, 'circle');
     arc.setAttribute('cx', CX); arc.setAttribute('cy', CY);
@@ -209,7 +167,6 @@ function renderRosco(pidx) {
   }
 }
 
-// ─── RENDER GENERAL ──────────────────────────────────────────────────────────
 function render() {
   renderRosco(0);
   renderRosco(1);
@@ -220,19 +177,11 @@ function render() {
 function renderCenter() {
   const ap     = state.activePlayer;
   const player = state.players[ap];
-
-  // Timer
   const timerEl = document.getElementById('timer');
   timerEl.textContent = formatTime(state.turnTimeLeft);
   timerEl.className   = `timer${state.turnTimeLeft <= 10 ? ' warning' : ''}`;
-
-  // Etiqueta de turno
   const label = document.getElementById('current-player-label');
-  label.textContent = player.done
-    ? '¡Rosco completado!'
-    : `Turno de ${player.name}`;
-
-  // Letra y definición actuales
+  label.textContent = player.done ? '¡Rosco completado!' : `Turno de ${player.name}`;
   const canPlay = !player.done && state.phase === 'playing';
   if (canPlay) {
     const item = player.rosco[player.currentIdx];
@@ -240,12 +189,8 @@ function renderCenter() {
     document.getElementById('definition-text').textContent = item.question.def;
   } else {
     document.getElementById('current-letter-display').textContent = player.done ? '✓' : '…';
-    document.getElementById('definition-text').textContent = player.done
-      ? '¡Rosco completado!'
-      : '';
+    document.getElementById('definition-text').textContent = player.done ? '¡Rosco completado!' : '';
   }
-
-  // Flash de respuesta correcta (por si quedó visible)
   const answerInput = document.getElementById('answer-input');
   const btnAnswer   = document.getElementById('btn-answer');
   const btnPass     = document.getElementById('btn-pass');
@@ -264,23 +209,18 @@ function updatePanelClasses() {
   });
 }
 
-// ─── LÓGICA DE JUEGO ─────────────────────────────────────────────────────────
 function handleAnswer() {
   const input  = document.getElementById('answer-input');
   const answer = input.value.trim();
   if (!answer) return;
-
   const ap   = state.activePlayer;
   const player = state.players[ap];
   if (player.done || state.phase !== 'playing') { input.value = ''; return; }
-
   const item    = player.rosco[player.currentIdx];
   const correct = normalize(answer) === normalize(item.question.resp);
-
   if (correct) {
     item.status = 'correct';
     playSound('correct');
-
     const allCorrect = player.rosco.every(r => r.status === 'correct');
     if (allCorrect) {
       player.done = true;
@@ -295,7 +235,6 @@ function handleAnswer() {
     playSound('wrong');
     flashWrongAnswer(item.question.resp);
   }
-
   advanceToNext(ap);
   input.value = '';
   render();
@@ -306,9 +245,7 @@ function handlePass() {
   const ap     = state.activePlayer;
   const player = state.players[ap];
   if (player.done || state.phase !== 'playing') return;
-
   const item = player.rosco[player.currentIdx];
-  // Segunda vez que pasamos esta letra: la marcamos incorrecta
   if (item.passedBefore) {
     item.status = 'wrong';
     playSound('wrong');
@@ -316,7 +253,6 @@ function handlePass() {
     item.status = 'passed';
     item.passedBefore = true;
   }
-
   advanceToNext(ap);
   render();
   postTurnCheck();
@@ -326,7 +262,6 @@ function advanceToNext(pidx) {
   const player = state.players[pidx];
   const rosco  = player.rosco;
   const n      = rosco.length;
-
   let next = -1;
   for (let i = 1; i <= n; i++) {
     const idx = (player.currentIdx + i) % n;
@@ -335,7 +270,6 @@ function advanceToNext(pidx) {
       break;
     }
   }
-
   if (next === -1) {
     player.done = true;
   } else {
@@ -346,16 +280,9 @@ function advanceToNext(pidx) {
 
 function postTurnCheck() {
   if (state.phase !== 'playing') return;
-
   const p0done = state.players[0].done;
   const p1done = state.players[1].done;
-
-  if (p0done && p1done) {
-    endGame();
-    return;
-  }
-
-  // Si el jugador activo terminó, pasamos al otro
+  if (p0done && p1done) { endGame(); return; }
   if (state.players[state.activePlayer].done) {
     const other = 1 - state.activePlayer;
     if (!state.players[other].done) {
@@ -366,7 +293,6 @@ function postTurnCheck() {
   }
 }
 
-// ─── FLASH DE RESPUESTA INCORRECTA ───────────────────────────────────────────
 function flashWrongAnswer(resp) {
   const el = document.getElementById('wrong-flash');
   if (!el) return;
@@ -376,23 +302,15 @@ function flashWrongAnswer(resp) {
   el._t = setTimeout(() => el.classList.remove('visible'), 2200);
 }
 
-// ─── TEMPORIZADOR ─────────────────────────────────────────────────────────────
 function startTimer() {
   clearInterval(state.timerInterval);
   state.turnTimeLeft = TURN_DURATION;
-
   state.timerInterval = setInterval(() => {
     state.turnTimeLeft--;
     state.totalElapsed++;
-
     if (state.turnTimeLeft > 0 && state.turnTimeLeft <= 5) playSound('tick');
-
     updateTimerDisplay();
-
-    if (state.totalElapsed >= MAX_GAME_TIME) {
-      endGame();
-      return;
-    }
+    if (state.totalElapsed >= MAX_GAME_TIME) { endGame(); return; }
     if (state.turnTimeLeft <= 0) switchPlayer();
   }, 1000);
 }
@@ -411,47 +329,34 @@ function updateTimerDisplay() {
 
 function switchPlayer() {
   if (state.phase !== 'playing') return;
-
   const p0done = state.players[0].done;
   const p1done = state.players[1].done;
   if (p0done && p1done) { endGame(); return; }
-
   const other = 1 - state.activePlayer;
-
   if (!state.players[other].done) {
     playSound('switch');
     state.activePlayer = other;
   }
-  // Si el otro ya terminó, se reinicia el timer para el activo
   startTimer();
   render();
 }
 
-// ─── FIN DE JUEGO ─────────────────────────────────────────────────────────────
 function endGame() {
   stopTimer();
   state.phase = 'gameover';
-
   const p0 = state.players[0];
   const p1 = state.players[1];
   const s0 = p0.rosco.filter(r => r.status === 'correct').length;
   const s1 = p1.rosco.filter(r => r.status === 'correct').length;
-
   let winnerText;
   if (s0 > s1)       winnerText = `¡Ganó ${p0.name}!`;
   else if (s1 > s0)  winnerText = `¡Ganó ${p1.name}!`;
   else               winnerText = '¡Empate!';
-
   document.getElementById('winner-text').textContent = winnerText;
-  document.getElementById('result-p0').innerHTML =
-    `${p0.name}: <span class="score-num">${s0}</span> / 27`;
-  document.getElementById('result-p1').innerHTML =
-    `${p1.name}: <span class="score-num">${s1}</span> / 27`;
-
-  // Mostrar respuestas que quedaron sin contestar correctamente
+  document.getElementById('result-p0').innerHTML = `${p0.name}: <span class="score-num">${s0}</span> / 27`;
+  document.getElementById('result-p1').innerHTML = `${p1.name}: <span class="score-num">${s1}</span> / 27`;
   renderAnswerSummary(p0, 'summary-p0');
   renderAnswerSummary(p1, 'summary-p1');
-
   playSound('win');
   showScreen('gameover');
 }
@@ -468,41 +373,33 @@ function renderAnswerSummary(player, containerId) {
     el.appendChild(span);
   });
   if (!el.childElementCount) {
-    el.innerHTML = '<span class="summary-perfect">¡Rosco perfecto! 🎉</span>';
+    el.innerHTML = '<span class="summary-perfect">¡Rosco perfecto!</span>';
   }
 }
 
-// ─── GESTIÓN DE PANTALLAS ────────────────────────────────────────────────────
 function showScreen(name) {
   ['setup', 'game', 'gameover'].forEach(s => {
     document.getElementById(`screen-${s}`).classList.toggle('hidden', s !== name);
   });
 }
 
-// ─── BOOTSTRAP ───────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   showScreen('setup');
-
-  // Enter en los campos de nombre → iniciar
   ['player1-name', 'player2-name'].forEach(id => {
     document.getElementById(id).addEventListener('keydown', e => {
       if (e.key === 'Enter') document.getElementById('btn-start').click();
     });
   });
-
   document.getElementById('btn-start').addEventListener('click', () => {
     const p1 = document.getElementById('player1-name').value.trim();
     const p2 = document.getElementById('player2-name').value.trim();
     initGame(p1, p2);
   });
-
   document.getElementById('btn-answer').addEventListener('click', handleAnswer);
   document.getElementById('btn-pass').addEventListener('click', handlePass);
-
   document.getElementById('answer-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') handleAnswer();
   });
-
   document.getElementById('btn-restart').addEventListener('click', () => {
     stopTimer();
     document.getElementById('player1-name').value = '';

@@ -1,7 +1,4 @@
-// Banco de preguntas del Rosco — una por letra del alfabeto español (27 letras)
-// Formato: { def: "Empieza con X: …" | "Con la X: …", resp: "RESPUESTA" }
-// La función normalize() en game.js elimina tildes y convierte Ñ→N para la comparación.
-
+'use strict';
 const QUESTION_BANK = {
   A: [
     { def: "Empieza con A: Ave rapaz de gran envergadura, símbolo nacional en muchos países", resp: "ÁGUILA" },
@@ -161,7 +158,7 @@ const QUESTION_BANK = {
     { def: "Empieza con S: Danza brasileña de ritmo contagioso relacionada con el carnaval de Río", resp: "SAMBA" },
     { def: "Empieza con S: Herramienta de corte con hoja dentada y mango, usada en carpintería", resp: "SIERRA" },
     { def: "Con la S: Palabra que los concursantes dicen en Pasapalabra para saltear una pregunta", resp: "PASAPALABRA" },
-    { def: "Con la S: Planta pequeña y esponjosa de color verde que crece en lugares húmedos y sombríos", resp: "MUSGO" },
+    { def: "Con la S: Planta pequeña y esponjosa de color verde que crece en lugares húmedos", resp: "MUSGO" },
   ],
   T: [
     { def: "Empieza con T: Gran felino rayado originario de Asia, el mayor de los félidos", resp: "TIGRE" },
